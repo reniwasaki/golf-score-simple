@@ -62,7 +62,6 @@ const App = () => {
     const updated = [...scores];
     updated[index][key] = value;
 
-    // ±差自動計算
     const par = parseInt(updated[index].par);
     const score = parseInt(updated[index].score);
     if (!isNaN(par) && !isNaN(score)) {
@@ -89,7 +88,6 @@ const App = () => {
     return { par, score, putt };
   };
 
-  // ✅ 集計
   const outTotal = total(0, 9);
   const inTotal = total(9, 18);
   const totalScore = outTotal.score + inTotal.score;
@@ -104,10 +102,9 @@ const App = () => {
       ? Math.round(validDrives.reduce((a, b) => a + b, 0) / validDrives.length)
       : 0;
 
-  const avgPutt =
-    (
-      scores.reduce((sum, s) => sum + (parseInt(s.putt) || 0), 0) / holeCount
-    ).toFixed(1);
+  const avgPutt = (
+    scores.reduce((sum, s) => sum + (parseInt(s.putt) || 0), 0) / holeCount
+  ).toFixed(1);
 
   // ✅ ティーショット比率
   const par3s = scores.filter((s) => s.par === "3");
@@ -145,6 +142,7 @@ const App = () => {
             </tr>
           </thead>
           <tbody>
+            {/* Par */}
             <tr>
               <td className="font-semibold text-green-700">Par</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -166,6 +164,7 @@ const App = () => {
               </td>
             </tr>
 
+            {/* Score */}
             <tr>
               <td className="font-semibold text-green-700">スコア</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -186,6 +185,7 @@ const App = () => {
               </td>
             </tr>
 
+            {/* Putt */}
             <tr>
               <td className="font-semibold text-green-700">パット数</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -206,6 +206,7 @@ const App = () => {
               </td>
             </tr>
 
+            {/* ±差 */}
             <tr>
               <td className="font-semibold text-green-700">±差</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -216,6 +217,7 @@ const App = () => {
               <td className="bg-green-50 sticky right-0">-</td>
             </tr>
 
+            {/* ティーショット */}
             <tr>
               <td className="font-semibold text-green-700">ティーショット</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -254,6 +256,7 @@ const App = () => {
               <td className="bg-green-50 sticky right-0">-</td>
             </tr>
 
+            {/* ドライバー */}
             <tr>
               <td className="font-semibold text-green-700">ドライバー(yd)</td>
               {scores.slice(start, end).map((hole, i) =>
@@ -300,10 +303,12 @@ const App = () => {
       />
 
       {/* ✅ 統計カード */}
-      <div className="flex flex-wrap justify-center items-center gap-3 bg-white/80 px-4 py-4 rounded-lg shadow-md w-full max-w-2xl mx-auto text-xs sm:text-base text-center mb-6">
+      <div className="flex flex-wrap justify-center items-center gap-3 bg-white/80 px-4 py-5 rounded-lg shadow-md w-full max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-center mb-6 leading-relaxed">
         <div>前半 Par:{outTotal.par}　Score:{outTotal.score}</div>
         <div>後半 Par:{inTotal.par}　Score:{inTotal.score}</div>
-        <div className="font-bold text-green-800">Total:{totalScore}</div>
+        <div className="font-bold text-green-800 text-xl sm:text-2xl">
+          Total:{totalScore}
+        </div>
         <div className="w-full border-t border-green-200 my-2"></div>
         <div>平均パット：{avgPutt}</div>
         <div>平均ドライバー：{avgDrive}yd</div>
@@ -311,10 +316,18 @@ const App = () => {
         <div>Par4/5フェアウェイ率：{fairwayRate}%</div>
       </div>
 
-      <Section title="前半（1〜9）" value={courseNames.out} setValue={(val) => setCourseNames({ ...courseNames, out: val })} />
+      <Section
+        title="前半（1〜9）"
+        value={courseNames.out}
+        setValue={(val) => setCourseNames({ ...courseNames, out: val })}
+      />
       {renderHoleInputs(0, 9)}
 
-      <Section title="後半（10〜18）" value={courseNames.in} setValue={(val) => setCourseNames({ ...courseNames, in: val })} />
+      <Section
+        title="後半（10〜18）"
+        value={courseNames.in}
+        setValue={(val) => setCourseNames({ ...courseNames, in: val })}
+      />
       {renderHoleInputs(9, 18)}
 
       <button
