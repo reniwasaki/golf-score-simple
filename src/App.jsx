@@ -26,6 +26,19 @@ const diffToSymbol = (diff) => {
 const App = () => {
   const [scores, setScores] = useState(initialData);
   const [courseNames, setCourseNames] = useState({ out: "OUT", in: "IN" });
+  const [golfCourseName, setGolfCourseName] = useState("");
+  const [online, setOnline] = useState(navigator.onLine);
+
+  // ✅ オンライン／オフライン監視
+  useEffect(() => {
+    const updateStatus = () => setOnline(navigator.onLine);
+    window.addEventListener("online", updateStatus);
+    window.addEventListener("offline", updateStatus);
+    return () => {
+      window.removeEventListener("online", updateStatus);
+      window.removeEventListener("offline", updateStatus);
+    };
+  }, []);
 
   // ✅ ローカル保存・復元
   useEffect(() => {
@@ -34,12 +47,16 @@ const App = () => {
       const parsed = JSON.parse(saved);
       setScores(parsed.scores || initialData);
       setCourseNames(parsed.courseNames || { out: "OUT", in: "IN" });
+      setGolfCourseName(parsed.golfCourseName || "");
     }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("golfScores", JSON.stringify({ scores, courseNames }));
-  }, [scores, courseNames]);
+    localStorage.setItem(
+      "golfScores",
+      JSON.stringify({ scores, courseNames, golfCourseName })
+    );
+  }, [scores, courseNames, golfCourseName]);
 
   const handleChange = (index, key, value) => {
     const updated = [...scores];
@@ -60,6 +77,7 @@ const App = () => {
 
   const resetAll = () => {
     setScores(initialData);
+    setGolfCourseName("");
     localStorage.removeItem("golfScores");
   };
 
@@ -75,18 +93,17 @@ const App = () => {
   const inTotal = total(9, 18);
   const totalScore = outTotal.score + inTotal.score;
 
-  // ✅ スマホ対応：テーブル部分を関数化
   const renderHoleInputs = (start, end) => (
     <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent">
       <div className="min-w-[900px] sm:min-w-full mx-auto flex justify-center">
         <table className="w-full text-xs sm:text-sm text-center border-collapse table-fixed">
           <thead>
             <tr>
-              <th className="px-1">ホール</th>
+              <th className="px-1 bg-green-50">ホール</th>
               {Array.from({ length: end - start }, (_, i) => (
                 <th key={i}>H{start + i + 1}</th>
               ))}
-              <th>合計</th>
+              <th className="bg-green-100 sticky right-0">合計</th>
             </tr>
           </thead>
           <tbody>
@@ -106,7 +123,9 @@ const App = () => {
                   </select>
                 </td>
               ))}
-              <td>{total(start, end).par}</td>
+              <td className="bg-green-50 font-bold sticky right-0">
+                {total(start, end).par}
+              </td>
             </tr>
 
             <tr>
@@ -122,7 +141,9 @@ const App = () => {
                   />
                 </td>
               ))}
-              <td>{total(start, end).score}</td>
+              <td className="bg-green-50 font-bold sticky right-0">
+                {total(start, end).score}
+              </td>
             </tr>
 
             <tr>
@@ -138,7 +159,9 @@ const App = () => {
                   />
                 </td>
               ))}
-              <td>{total(start, end).putt}</td>
+              <td className="bg-green-50 font-bold sticky right-0">
+                {total(start, end).putt}
+              </td>
             </tr>
 
             <tr>
@@ -148,7 +171,7 @@ const App = () => {
                   {hole.diff}
                 </td>
               ))}
-              <td>-</td>
+              <td className="bg-green-50 sticky right-0">-</td>
             </tr>
 
             <tr>
@@ -182,7 +205,7 @@ const App = () => {
                   )}
                 </td>
               ))}
-              <td>-</td>
+              <td className="bg-green-50 sticky right-0">-</td>
             </tr>
 
             <tr>
@@ -202,7 +225,7 @@ const App = () => {
                   <td key={i}>-</td>
                 )
               )}
-              <td>0</td>
+              <td className="bg-green-50 sticky right-0 font-bold">0</td>
             </tr>
           </tbody>
         </table>
@@ -212,10 +235,25 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-green-50 text-green-900 flex flex-col items-center px-2 sm:px-6 py-4 sm:py-8 max-w-[1200px] mx-auto overflow-x-hidden">
-      <h1 className="text-xl sm:text-2xl font-bold mb-3">
-        🏌️‍♂️ Golf Score Card
-      </h1>
+      <h1 className="text-xl sm:text-2xl font-bold mb-3">🏌️‍♂️ Golf Score Card</h1>
 
+      {/* ✅ オフライン警告 */}
+      {!online && (
+        <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-2 text-sm font-medium">
+          ⚠️ 現在オフラインモードです（データは自動保存されます）
+        </div>
+      )}
+
+      {/* ✅ ゴルフ場名入力欄 */}
+      <input
+        type="text"
+        value={golfCourseName}
+        onChange={(e) => setGolfCourseName(e.target.value)}
+        placeholder="ゴルフ場名を入力（例：姉ヶ崎カントリー倶楽部）"
+        className="border rounded px-3 py-2 w-full sm:w-96 text-center mb-4"
+      />
+
+      {/* ✅ 集計エリア */}
       <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 bg-white/70 px-3 py-2 rounded-lg shadow-md w-full max-w-md mx-auto text-xs sm:text-base text-center mb-4">
         <div>前半 Par:{outTotal.par}　Score:{outTotal.score}</div>
         <div>後半 Par:{inTotal.par}　Score:{inTotal.score}</div>
@@ -230,9 +268,7 @@ const App = () => {
         <input
           type="text"
           value={courseNames.out}
-          onChange={(e) =>
-            setCourseNames({ ...courseNames, out: e.target.value })
-          }
+          onChange={(e) => setCourseNames({ ...courseNames, out: e.target.value })}
           placeholder="コース名（例：OUT）"
           className="border rounded px-2 py-1 w-40 text-center"
         />
@@ -247,9 +283,7 @@ const App = () => {
         <input
           type="text"
           value={courseNames.in}
-          onChange={(e) =>
-            setCourseNames({ ...courseNames, in: e.target.value })
-          }
+          onChange={(e) => setCourseNames({ ...courseNames, in: e.target.value })}
           placeholder="コース名（例：IN）"
           className="border rounded px-2 py-1 w-40 text-center"
         />
