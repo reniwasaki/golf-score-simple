@@ -25,11 +25,10 @@ export default function App() {
   const [golfCourseName, setGolfCourseName] = useState("");
   const [history, setHistory] = useState([]);
   const [theme, setTheme] = useState("light");
-  const [viewMode, setViewMode] = useState("vertical"); // ✅ 表示モード
+  const [viewMode, setViewMode] = useState("vertical");
 
-  // ✅ localStorage復元
   useEffect(() => {
-    const saved = localStorage.getItem("golfAppData_v2");
+    const saved = localStorage.getItem("golfAppData_v4");
     if (saved) {
       const parsed = JSON.parse(saved);
       setScores(parsed.scores || initialData);
@@ -40,10 +39,9 @@ export default function App() {
     }
   }, []);
 
-  // ✅ 自動保存
   useEffect(() => {
     localStorage.setItem(
-      "golfAppData_v2",
+      "golfAppData_v4",
       JSON.stringify({ scores, golfCourseName, history, theme, viewMode })
     );
   }, [scores, golfCourseName, history, theme, viewMode]);
@@ -97,15 +95,12 @@ export default function App() {
   const toggleViewMode = () =>
     setViewMode(viewMode === "vertical" ? "horizontal" : "vertical");
 
-  // ✅ 柔らかいダークトーン設定
-  const darkStyle = {
-    backgroundColor: "#3B3024",
-    color: "#F5E6CC",
-  };
-
   const borderStyle = theme === "dark" ? "border-[#8C7A62]" : "border-gray-300";
+  const bgCard =
+    theme === "dark" ? "bg-[#4B3B2A] text-[#F5E6CC]" : "bg-white text-green-900";
+  const bgBase =
+    theme === "dark" ? "bg-[#3B3024] text-[#F5E6CC]" : "bg-green-50 text-green-900";
 
-  // ✅ スコア入力（＋／−）
   const ScoreInput = ({ index, value }) => (
     <div className="flex justify-center items-center gap-1">
       <button
@@ -140,14 +135,8 @@ export default function App() {
   );
 
   return (
-    <div
-      className={`min-h-screen flex flex-col items-center p-4 transition-colors duration-300 ${
-        theme === "dark"
-          ? "bg-[#3B3024] text-[#F5E6CC]"
-          : "bg-green-50 text-green-900"
-      }`}
-    >
-      {/* ✅ ヘッダー */}
+    <div className={`min-h-screen flex flex-col items-center p-4 ${bgBase}`}>
+      {/* ヘッダー */}
       <div className="w-full flex justify-between items-center max-w-4xl mb-4">
         <h1 className="text-xl sm:text-2xl font-bold">🏌️ Golf Score Card</h1>
         <div className="flex gap-2">
@@ -166,7 +155,7 @@ export default function App() {
         </div>
       </div>
 
-      {/* ✅ ゴルフ場名 */}
+      {/* コース名 */}
       <input
         type="text"
         value={golfCourseName}
@@ -177,29 +166,26 @@ export default function App() {
         }`}
       />
 
-      {/* ✅ 集計表示 */}
+      {/* 集計 */}
       <div
-        className={`flex flex-wrap justify-center items-center gap-3 px-3 py-2 rounded-lg shadow w-full max-w-md text-sm text-center mb-4 ${
-          theme === "dark" ? "bg-[#4B3B2A]" : "bg-white/70"
-        }`}
+        className={`flex flex-wrap justify-center items-center gap-3 px-3 py-2 rounded-lg shadow w-full max-w-md text-sm text-center mb-4 ${bgCard}`}
       >
         <div>前半 Par:{outTotal.par}　Score:{outTotal.score}</div>
         <div>後半 Par:{inTotal.par}　Score:{inTotal.score}</div>
         <div className="font-bold">Total:{totalScore}</div>
       </div>
 
+      {/* 平均 */}
       <div className="text-xs sm:text-sm mb-4 opacity-80">
         前半 平均パット: {outTotal.avgPutt}　FW率: {outTotal.fairwayRate}%　
         ／ 後半 平均パット: {inTotal.avgPutt}　FW率: {inTotal.fairwayRate}%
       </div>
 
-      {/* ✅ 表描画（縦 or 横） */}
+      {/* 表切り替え */}
       {viewMode === "vertical" ? (
         // ▼ 縦表示
         <div className="w-full overflow-x-auto max-w-3xl">
-          <table
-            className={`w-full text-xs sm:text-sm text-center border-collapse ${borderStyle}`}
-          >
+          <table className={`w-full text-xs sm:text-sm text-center border-collapse ${borderStyle}`}>
             <thead>
               <tr>
                 <th>Hole</th>
@@ -213,8 +199,7 @@ export default function App() {
             </thead>
             <tbody>
               {scores.map((h, i) => {
-                const diff =
-                  h.par && h.score ? diffToSymbol(h.score - h.par) : "";
+                const diff = h.par && h.score ? diffToSymbol(h.score - h.par) : "";
                 return (
                   <tr key={i} className="border-b border-gray-300 dark:border-[#6E5B43]">
                     <td>{i + 1}</td>
@@ -222,9 +207,7 @@ export default function App() {
                       <select
                         value={h.par}
                         onChange={(e) => handleChange(i, "par", e.target.value)}
-                        className={`border rounded ${borderStyle} ${
-                          theme === "dark" ? "bg-[#4B3B2A]" : ""
-                        }`}
+                        className={`border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
                       >
                         <option value=""></option>
                         <option value="3">3</option>
@@ -232,30 +215,20 @@ export default function App() {
                         <option value="5">5</option>
                       </select>
                     </td>
-                    <td>
-                      <ScoreInput index={i} value={h.score} />
-                    </td>
+                    <td><ScoreInput index={i} value={h.score} /></td>
                     <td>
                       <input
                         type="number"
                         value={h.putt}
-                        onChange={(e) =>
-                          handleChange(i, "putt", e.target.value)
-                        }
-                        className={`w-10 border rounded text-center ${borderStyle} ${
-                          theme === "dark" ? "bg-[#4B3B2A]" : ""
-                        }`}
+                        onChange={(e) => handleChange(i, "putt", e.target.value)}
+                        className={`w-10 border rounded text-center ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
                       />
                     </td>
                     <td>
                       <select
                         value={h.teeShot}
-                        onChange={(e) =>
-                          handleChange(i, "teeShot", e.target.value)
-                        }
-                        className={`border rounded ${borderStyle} ${
-                          theme === "dark" ? "bg-[#4B3B2A]" : ""
-                        }`}
+                        onChange={(e) => handleChange(i, "teeShot", e.target.value)}
+                        className={`border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
                       >
                         <option>-</option>
                         <option>フェアウェイ</option>
@@ -269,12 +242,8 @@ export default function App() {
                         <input
                           type="number"
                           value={h.drive}
-                          onChange={(e) =>
-                            handleChange(i, "drive", e.target.value)
-                          }
-                          className={`w-14 text-center border rounded ${borderStyle} ${
-                            theme === "dark" ? "bg-[#4B3B2A]" : ""
-                          }`}
+                          onChange={(e) => handleChange(i, "drive", e.target.value)}
+                          className={`w-14 text-center border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
                           placeholder="yd"
                         />
                       ) : (
@@ -289,34 +258,117 @@ export default function App() {
           </table>
         </div>
       ) : (
-        // ▼ 横表示（前のバージョンの形式）
-        <div className="w-full overflow-x-auto">
-          <table
-            className={`w-full text-xs sm:text-sm text-center border-collapse ${borderStyle}`}
-          >
-            <thead>
-              <tr>
-                <th>ホール</th>
-                {scores.slice(0, 9).map((_, i) => (
-                  <th key={i}>H{i + 1}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>スコア</td>
-                {scores.slice(0, 9).map((h, i) => (
-                  <td key={i}>
-                    <ScoreInput index={i} value={h.score} />
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+        // ▼ 横表示（OUT/IN）
+        <div className="w-full flex flex-col gap-8 max-w-5xl">
+          {["前半（OUT）", "後半（IN）"].map((label, idx) => {
+            const start = idx === 0 ? 0 : 9;
+            const end = idx === 0 ? 9 : 18;
+            return (
+              <div key={idx} className="overflow-x-auto">
+                <h3 className="font-bold text-center mb-2">{label}</h3>
+                <table className={`w-full text-xs sm:text-sm text-center border-collapse ${borderStyle}`}>
+                  <thead>
+                    <tr>
+                      <th>Hole</th>
+                      {scores.slice(start, end).map((_, i) => (
+                        <th key={i}>{start + i + 1}</th>
+                      ))}
+                      <th>合計</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {["Par", "スコア", "パット", "ティー", "距離(yd)", "±"].map((row) => (
+                      <tr key={row}>
+                        <td>{row}</td>
+                        {scores.slice(start, end).map((h, i) => {
+                          const diff = h.par && h.score ? diffToSymbol(h.score - h.par) : "";
+                          switch (row) {
+                            case "Par":
+                              return (
+                                <td key={i}>
+                                  <select
+                                    value={h.par}
+                                    onChange={(e) => handleChange(start + i, "par", e.target.value)}
+                                    className={`border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
+                                  >
+                                    <option value=""></option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                  </select>
+                                </td>
+                              );
+                            case "スコア":
+                              return <td key={i}><ScoreInput index={start + i} value={h.score} /></td>;
+                            case "パット":
+                              return (
+                                <td key={i}>
+                                  <input
+                                    type="number"
+                                    value={h.putt}
+                                    onChange={(e) => handleChange(start + i, "putt", e.target.value)}
+                                    className={`w-10 border rounded text-center ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
+                                  />
+                                </td>
+                              );
+                            case "ティー":
+                              return (
+                                <td key={i}>
+                                  <select
+                                    value={h.teeShot}
+                                    onChange={(e) => handleChange(start + i, "teeShot", e.target.value)}
+                                    className={`border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
+                                  >
+                                    <option>-</option>
+                                    <option>フェアウェイ</option>
+                                    <option>右ラフ</option>
+                                    <option>左ラフ</option>
+                                    <option>OB</option>
+                                  </select>
+                                </td>
+                              );
+                            case "距離(yd)":
+                              return (
+                                <td key={i}>
+                                  {h.par !== "3" ? (
+                                    <input
+                                      type="number"
+                                      value={h.drive}
+                                      onChange={(e) => handleChange(start + i, "drive", e.target.value)}
+                                      className={`w-14 text-center border rounded ${borderStyle} ${theme === "dark" ? "bg-[#4B3B2A]" : ""}`}
+                                      placeholder="yd"
+                                    />
+                                  ) : (
+                                    "-"
+                                  )}
+                                </td>
+                              );
+                            case "±":
+                              return <td key={i}>{diff}</td>;
+                            default:
+                              return null;
+                          }
+                        })}
+                        <td className="font-bold">
+                          {row === "Par"
+                            ? total(start, end).par
+                            : row === "スコア"
+                            ? total(start, end).score
+                            : row === "パット"
+                            ? total(start, end).putt
+                            : ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            );
+          })}
         </div>
       )}
 
-      {/* ✅ ボタン群 */}
+      {/* ボタン群 */}
       <div className="flex gap-2 mt-6">
         <button
           onClick={saveRound}
@@ -332,7 +384,7 @@ export default function App() {
         </button>
       </div>
 
-      {/* ✅ 履歴 */}
+      {/* 履歴 */}
       <div className="w-full max-w-3xl mt-6">
         <h2 className="text-lg font-bold mb-2">📜 スコア履歴</h2>
         {history.length === 0 ? (
