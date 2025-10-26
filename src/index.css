@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+/* === select要素の高さ・行間を完全固定 === */
+select {
+  line-height: 1.2 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 48px !important;
+  appearance: none !important;
+}
+/* ===== 完全ピクセル揃え版 ===== */
+input,
+select,
+div.score-cell {
+  height: 46px !important;
+  line-height: 46px !important;
+  font-size: 13px !important;
+  text-align: center;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* select特有のUI差を打ち消す */
+select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+/* select右端の矢印を消す（完全整列用） */
+select::-ms-expand {
+  display: none;
+}
