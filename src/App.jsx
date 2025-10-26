@@ -105,49 +105,55 @@ export default function App() {
         </div>
 
         {/* === 出力画像用コンテナ === */}
-        <div
-          id="score-image"
-          className={`p-6 rounded-xl shadow-lg ${cardColor}`}
-          style={{
-            width: "1080px",
-            height: "1080px",
-            backgroundColor: "#EAF5E3",
-            fontFamily: "'Noto Sans JP', sans-serif",
-          }}
-        >
-          <div className="text-center mb-6">
-            <h2 className="text-3xl font-bold mb-1">{courseName || "ゴルフ場名"}</h2>
-            <p className="text-2xl font-semibold text-green-800">
-              🏆 Total {totalScore}（前半 {calcSum("score", 0, 9)} ／ 後半 {calcSum("score", 9, 18)}）
-            </p>
-          </div>
+<div
+  id="score-image"
+  className={`flex flex-col justify-center items-center mx-auto p-6 rounded-xl shadow-lg ${cardColor}`}
+  style={{
+    width: "1080px",
+    height: "1080px",
+    backgroundColor: "#EAF5E3",
+    fontFamily: "'Noto Sans JP', sans-serif",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  {/* タイトル */}
+  <div className="text-center mb-6">
+    <h2 className="text-3xl font-bold mb-1">{courseName || "ゴルフ場名"}</h2>
+    <p className="text-2xl font-semibold text-green-800">
+      🏆 Total {totalScore}（前半 {calcSum("score", 0, 9)} ／ 後半 {calcSum("score", 9, 18)}）
+    </p>
+  </div>
 
-          {/* スコアテーブル */}
-          <div className="flex flex-col items-center space-y-4">
-            {[0, 9].map((startIdx) => (
-              <div key={startIdx} className="flex gap-2">
-                {scores.slice(startIdx, startIdx + 9).map((s, i) => (
-                  <div
-                    key={startIdx + i}
-                    className="w-24 bg-white bg-opacity-90 text-center p-3 rounded shadow"
-                  >
-                    <div className="text-sm font-semibold text-green-700">
-                      H{startIdx + i + 1}
-                    </div>
-                    <div className="text-lg font-bold text-gray-800">
-                      {s.score || "-"}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
+  {/* スコア表 */}
+  <div className="flex flex-col items-center space-y-4">
+    {[0, 9].map((startIdx) => (
+      <div key={startIdx} className="flex gap-3 justify-center">
+        {scores.slice(startIdx, startIdx + 9).map((s, i) => (
+          <div
+            key={startIdx + i}
+            className="w-24 h-24 bg-white bg-opacity-90 flex flex-col justify-center items-center text-center rounded-lg shadow"
+          >
+            <div className="text-sm font-semibold text-green-700">
+              H{startIdx + i + 1}
+            </div>
+            <div className="text-2xl font-bold text-gray-800">
+              {s.score || "-"}
+            </div>
           </div>
+        ))}
+      </div>
+    ))}
+  </div>
 
-          {/* 平均表示 */}
-          <div className="text-center mt-10 text-xl font-semibold text-green-900">
-            平均パット：{avgPutt}　平均飛距離：{avgDrive}yd
-          </div>
-        </div>
+  {/* 平均表示 */}
+  <div className="text-center mt-10 text-xl font-semibold text-green-900">
+    平均パット：{avgPutt}　平均飛距離：{avgDrive}yd
+  </div>
+</div>
+
 
         {/* === ボタン === */}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
