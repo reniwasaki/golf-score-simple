@@ -341,7 +341,7 @@ const App = () => {
         <div>平均パット：{avgPutt}</div>
         <div>平均ドライバー：{avgDrive}yd</div>
         <div>Par3グリーンオン率：{greenOnRate}%</div>
-        <div>Par4/5フェアウェイ率：{fairwayRate}%</div>
+        <div>Par4/Par5フェアウェイ率：{fairwayRate}%</div>
       </div>
 
       {/* ✅ 前半・後半 */}
