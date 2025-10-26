@@ -31,9 +31,7 @@ export default function App() {
 
   // 🧮 集計
   const calcSum = (field, start, end) =>
-    scores
-      .slice(start, end)
-      .reduce((sum, s) => sum + (parseInt(s[field]) || 0), 0);
+    scores.slice(start, end).reduce((sum, s) => sum + (parseInt(s[field]) || 0), 0);
 
   const totalScore = calcSum("score", 0, 18);
   const totalPar = calcSum("par", 0, 18);
@@ -60,9 +58,8 @@ export default function App() {
     const captureElement = document.getElementById("score-image");
     if (!captureElement) return;
 
-    // 一時的に背景を追加して安定化
     const canvas = await html2canvas(captureElement, {
-      backgroundColor: darkMode ? "#3f3b36" : "#f5f7f2",
+      backgroundColor: "#EAF5E3", // 芝生風
       scale: 2,
       width: 1080,
       height: 1080,
@@ -82,7 +79,6 @@ export default function App() {
     localStorage.removeItem("golf-score-data");
   };
 
-  // 色テーマ
   const bgColor = darkMode ? "bg-[#3f3b36] text-white" : "bg-green-50 text-green-900";
   const cardColor = darkMode ? "bg-[#4b453f]" : "bg-white";
   const borderStyle = darkMode ? "border-gray-500" : "border-green-300";
@@ -109,146 +105,47 @@ export default function App() {
         </div>
 
         {/* === 出力画像用コンテナ === */}
-        <div id="score-image" className={`p-4 rounded-xl shadow ${cardColor}`}>
-          <input
-            type="text"
-            placeholder="ゴルフ場名を入力"
-            value={courseName}
-            onChange={(e) => setCourseName(e.target.value)}
-            className={`w-full text-center text-xl font-semibold mb-3 p-2 border rounded ${borderStyle}`}
-          />
-
-          <div className="text-center mb-4">
-            <p className="font-bold text-lg">
-              Total: {totalScore}　Par: {totalPar}
-            </p>
-            <p>
-              平均パット：{avgPutt}　平均飛距離：{avgDrive}yd
+        <div
+          id="score-image"
+          className={`p-6 rounded-xl shadow-lg ${cardColor}`}
+          style={{
+            width: "1080px",
+            height: "1080px",
+            backgroundColor: "#EAF5E3",
+            fontFamily: "'Noto Sans JP', sans-serif",
+          }}
+        >
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold mb-1">{courseName || "ゴルフ場名"}</h2>
+            <p className="text-2xl font-semibold text-green-800">
+              🏆 Total {totalScore}（前半 {calcSum("score", 0, 9)} ／ 後半 {calcSum("score", 9, 18)}）
             </p>
           </div>
 
-          {/* === スコア表 === */}
-          <div
-            className={`${
-              viewVertical ? "grid grid-cols-2 gap-4" : "flex flex-col"
-            }`}
-          >
+          {/* スコアテーブル */}
+          <div className="flex flex-col items-center space-y-4">
             {[0, 9].map((startIdx) => (
-              <div key={startIdx}>
-                <h2 className="font-bold text-green-700 mb-2">
-                  {startIdx === 0 ? "前半（1〜9）" : "後半（10〜18）"}
-                </h2>
-                <div
-                  className={`${
-                    viewVertical ? "flex flex-col" : "grid grid-cols-9"
-                  } gap-2`}
-                >
-                  {scores.slice(startIdx, startIdx + 9).map((s, i) => {
-                    const index = startIdx + i;
-                    const par = parseInt(s.par) || 0;
-                    const score = parseInt(s.score) || 0;
-                    const diff = score - par;
-                    const diffSymbol =
-                      diff === 0
-                        ? "ー"
-                        : diff === -1
-                        ? "◯"
-                        : diff === -2
-                        ? "◎"
-                        : diff <= -3
-                        ? "☆"
-                        : diff === 1
-                        ? "△"
-                        : diff === 2
-                        ? "□"
-                        : `+${diff}`;
-
-                    return (
-                      <div
-                        key={index}
-                        className={`p-2 text-center rounded border ${borderStyle}`}
-                      >
-                        <p className="font-bold text-green-700">H{index + 1}</p>
-
-                        {/* Par */}
-                        <select
-                          value={s.par}
-                          onChange={(e) =>
-                            handleChange(index, "par", e.target.value)
-                          }
-                          className={`w-full text-center border rounded ${borderStyle}`}
-                        >
-                          <option value="">Par</option>
-                          <option value="3">3</option>
-                          <option value="4">4</option>
-                          <option value="5">5</option>
-                        </select>
-
-                        {/* スコア */}
-                        <NumberInput
-                          index={index}
-                          field="score"
-                          value={s.score}
-                          handleChange={handleChange}
-                          borderStyle={borderStyle}
-                        />
-
-                        {/* パット */}
-                        <NumberInput
-                          index={index}
-                          field="putt"
-                          value={s.putt}
-                          handleChange={handleChange}
-                          borderStyle={borderStyle}
-                        />
-
-                        <p className="text-sm mt-1">{diffSymbol}</p>
-
-                        {/* ティーショット */}
-                        <select
-                          value={s.tee}
-                          onChange={(e) =>
-                            handleChange(index, "tee", e.target.value)
-                          }
-                          className={`w-full text-center border rounded ${borderStyle}`}
-                        >
-                          <option value="">ティー</option>
-                          {par === 3 ? (
-                            <>
-                              <option value="グリーンオン">グリーンオン</option>
-                              <option value="右">右</option>
-                              <option value="左">左</option>
-                              <option value="奥">奥</option>
-                              <option value="手前">手前</option>
-                              <option value="OB">OB</option>
-                            </>
-                          ) : (
-                            <>
-                              <option value="フェアウェイ">フェアウェイ</option>
-                              <option value="右ラフ">右ラフ</option>
-                              <option value="左ラフ">左ラフ</option>
-                              <option value="OB">OB</option>
-                            </>
-                          )}
-                        </select>
-
-                        {par !== 3 && (
-                          <input
-                            type="number"
-                            placeholder="yd"
-                            value={s.drive}
-                            onChange={(e) =>
-                              handleChange(index, "drive", e.target.value)
-                            }
-                            className={`w-full text-center border rounded ${borderStyle}`}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+              <div key={startIdx} className="flex gap-2">
+                {scores.slice(startIdx, startIdx + 9).map((s, i) => (
+                  <div
+                    key={startIdx + i}
+                    className="w-24 bg-white bg-opacity-90 text-center p-3 rounded shadow"
+                  >
+                    <div className="text-sm font-semibold text-green-700">
+                      H{startIdx + i + 1}
+                    </div>
+                    <div className="text-lg font-bold text-gray-800">
+                      {s.score || "-"}
+                    </div>
+                  </div>
+                ))}
               </div>
             ))}
+          </div>
+
+          {/* 平均表示 */}
+          <div className="text-center mt-10 text-xl font-semibold text-green-900">
+            平均パット：{avgPutt}　平均飛距離：{avgDrive}yd
           </div>
         </div>
 
