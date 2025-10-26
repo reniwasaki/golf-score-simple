@@ -63,10 +63,7 @@ export default function App() {
     const segment = scores.slice(start, end);
     const validScores = segment.filter((s) => s.score && s.par);
     const parSum = validScores.reduce((acc, s) => acc + parseInt(s.par), 0);
-    const scoreSum = validScores.reduce(
-      (acc, s) => acc + parseInt(s.score),
-      0
-    );
+    const scoreSum = validScores.reduce((acc, s) => acc + parseInt(s.score), 0);
     const puttSum = validScores.reduce(
       (acc, s) => acc + parseInt(s.putt || 0),
       0
@@ -79,9 +76,7 @@ export default function App() {
         ? Math.round(drives.reduce((a, b) => a + b, 0) / drives.length)
         : 0;
     const avgPutt =
-      validScores.length > 0
-        ? (puttSum / validScores.length).toFixed(1)
-        : 0;
+      validScores.length > 0 ? (puttSum / validScores.length).toFixed(1) : 0;
 
     return {
       par: parSum,
@@ -112,44 +107,66 @@ export default function App() {
     alert("スコアを保存しました！");
   };
 
+  // 📸 Instagram向け 1080×1080出力
   const handleCapture = async () => {
-    if (!captureRef.current) return;
+    const exportDiv = document.createElement("div");
+    exportDiv.style.width = "1080px";
+    exportDiv.style.height = "1080px";
+    exportDiv.style.backgroundColor =
+      theme === "dark" ? "#3B3024" : "#f8fdf8";
+    exportDiv.style.display = "flex";
+    exportDiv.style.flexDirection = "column";
+    exportDiv.style.alignItems = "center";
+    exportDiv.style.justifyContent = "center";
+    exportDiv.style.textAlign = "center";
+    exportDiv.style.fontFamily = "sans-serif";
+    exportDiv.style.color = theme === "dark" ? "#F5E6CC" : "#1E3A1A";
+
     const avgPuttTotal =
       ((parseFloat(outStats.avgPutt) + parseFloat(inStats.avgPutt)) / 2).toFixed(
         1
       );
 
-    const header = document.createElement("div");
-    header.style.textAlign = "center";
-    header.style.marginBottom = "16px";
-    header.style.color = theme === "dark" ? "#F5E6CC" : "#222";
-    header.innerHTML = `
-      <div style="font-size:18px;font-weight:bold;">🏌️‍♂️ ${
-        courseName || "未入力コース"
-      }</div>
-      <div style="font-size:14px;">${new Date().toLocaleDateString("ja-JP")}</div>
-      <div style="font-size:14px;margin-top:4px;">
-        Total: <b>${totalScore}</b>（OUT ${outStats.score} / IN ${
-      inStats.score
-    }）<br/>
-        平均飛距離: ${avgDriveTotal}yd ／ 平均パット: ${avgPuttTotal}
+    exportDiv.innerHTML = `
+      <div style="font-size:36px; font-weight:bold; margin-bottom:20px;">
+        🏌️‍♂️ ${courseName || "未入力コース"}
+      </div>
+      <div style="font-size:22px; opacity:0.8; margin-bottom:24px;">
+        ${new Date().toLocaleDateString("ja-JP")}
+      </div>
+      <div style="font-size:60px; font-weight:bold; margin-bottom:24px;">
+        Total ${totalScore}
+      </div>
+      <div style="font-size:24px; margin-bottom:16px;">
+        OUT ${outStats.score} ／ IN ${inStats.score}
+      </div>
+      <div style="font-size:22px; margin-bottom:8px;">
+        平均飛距離：${avgDriveTotal}yd
+      </div>
+      <div style="font-size:22px;">
+        平均パット：${avgPuttTotal}
+      </div>
+      <div style="margin-top:60px; font-size:18px; opacity:0.5;">
+        golf-score-simple.vercel.app
       </div>
     `;
-    captureRef.current.prepend(header);
 
-    const canvas = await html2canvas(captureRef.current, {
+    document.body.appendChild(exportDiv);
+
+    const canvas = await html2canvas(exportDiv, {
       backgroundColor: theme === "dark" ? "#3B3024" : "#f8fdf8",
       scale: 2,
+      useCORS: true,
     });
 
-    captureRef.current.removeChild(header);
+    document.body.removeChild(exportDiv);
 
     const dataUrl = canvas.toDataURL("image/png");
     const link = document.createElement("a");
     link.href = dataUrl;
     link.download = `${
       courseName || "scorecard"
-    }_${new Date().toISOString().slice(0, 10)}.png`;
+    }_instagram_${new Date().toISOString().slice(0, 10)}.png`;
     link.click();
   };
 
@@ -206,7 +223,6 @@ export default function App() {
           ).toFixed(1)}
         </p>
 
-        {/* 🔹 スコアテーブル（縦 or 横） */}
         {viewMode === "vertical" ? (
           <VerticalTable
             scores={scores}
@@ -265,7 +281,7 @@ export default function App() {
   );
 }
 
-// ---------- 縦表示テーブル ----------
+// ---------- 縦表示 ----------
 const VerticalTable = ({
   scores,
   handleChange,
@@ -483,7 +499,7 @@ const HorizontalTable = ({
   </>
 );
 
-// ---------- 数値入力コンポーネント（±ボタン付き） ----------
+// ---------- 数値入力（±ボタン付き） ----------
 const NumberInput = ({ index, field, value, handleChange, borderStyle }) => {
   const inc = () =>
     handleChange(index, field, parseInt(value || 0) + 1);
@@ -513,3 +529,4 @@ const NumberInput = ({ index, field, value, handleChange, borderStyle }) => {
     </div>
   );
 };
+
