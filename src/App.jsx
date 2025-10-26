@@ -29,7 +29,6 @@ const App = () => {
   const [golfCourseName, setGolfCourseName] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
 
-  // ✅ オンライン／オフライン監視
   useEffect(() => {
     const updateStatus = () => setOnline(navigator.onLine);
     window.addEventListener("online", updateStatus);
@@ -40,7 +39,6 @@ const App = () => {
     };
   }, []);
 
-  // ✅ ローカル保存・復元
   useEffect(() => {
     const saved = localStorage.getItem("golfScores");
     if (saved) {
@@ -122,14 +120,16 @@ const App = () => {
   const fairwayRate =
     par45s.length > 0
       ? Math.round(
-          (par45s.filter((s) => s.teeShot === "◯").length / par45s.length) * 100
+          (par45s.filter((s) => s.teeShot === "フェアウェイ").length /
+            par45s.length) *
+            100
         )
       : 0;
 
   const renderHoleInputs = (start, end) => (
-    <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-3 sm:p-5 mb-6">
+    <div className="w-full overflow-x-auto bg-white/90 rounded-2xl shadow-lg p-3 sm:p-5 mb-6">
       <div className="min-w-[900px] sm:min-w-full mx-auto flex justify-center">
-        <table className="w-full text-xs sm:text-sm text-center border border-green-200 rounded-lg overflow-hidden table-fixed shadow-sm">
+        <table className="w-full text-xs sm:text-sm text-center border border-green-200 rounded-lg table-fixed shadow-sm">
           <thead>
             <tr>
               <th className="px-1 bg-green-100 text-green-800 font-semibold">
@@ -142,7 +142,6 @@ const App = () => {
             </tr>
           </thead>
           <tbody>
-            {/* Par */}
             <tr>
               <td className="font-semibold text-green-700">Par</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -164,7 +163,6 @@ const App = () => {
               </td>
             </tr>
 
-            {/* Score */}
             <tr>
               <td className="font-semibold text-green-700">スコア</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -185,7 +183,6 @@ const App = () => {
               </td>
             </tr>
 
-            {/* Putt */}
             <tr>
               <td className="font-semibold text-green-700">パット数</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -206,18 +203,6 @@ const App = () => {
               </td>
             </tr>
 
-            {/* ±差 */}
-            <tr>
-              <td className="font-semibold text-green-700">±差</td>
-              {scores.slice(start, end).map((hole, i) => (
-                <td key={i} className="font-bold">
-                  {hole.diff}
-                </td>
-              ))}
-              <td className="bg-green-50 sticky right-0">-</td>
-            </tr>
-
-            {/* ティーショット */}
             <tr>
               <td className="font-semibold text-green-700">ティーショット</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -244,39 +229,18 @@ const App = () => {
                       onChange={(e) =>
                         handleChange(start + i, "teeShot", e.target.value)
                       }
-                      className="border border-green-200 rounded-md w-16 text-center py-1 shadow-inner"
+                      className="border border-green-200 rounded-md w-20 sm:w-24 text-center py-1 shadow-inner"
                     >
                       <option value="-">-</option>
-                      <option value="◯">◯</option>
-                      <option value="×">×</option>
+                      <option value="フェアウェイ">フェアウェイ</option>
+                      <option value="右ラフ">右ラフ</option>
+                      <option value="左ラフ">左ラフ</option>
+                      <option value="OB">OB</option>
                     </select>
                   )}
                 </td>
               ))}
               <td className="bg-green-50 sticky right-0">-</td>
-            </tr>
-
-            {/* ドライバー */}
-            <tr>
-              <td className="font-semibold text-green-700">ドライバー(yd)</td>
-              {scores.slice(start, end).map((hole, i) =>
-                hole.par !== "3" ? (
-                  <td key={i}>
-                    <input
-                      type="number"
-                      value={hole.drive}
-                      onChange={(e) =>
-                        handleChange(start + i, "drive", e.target.value)
-                      }
-                      className="border border-green-200 rounded-md w-14 sm:w-16 text-center py-1 shadow-inner"
-                      placeholder="yd"
-                    />
-                  </td>
-                ) : (
-                  <td key={i}>-</td>
-                )
-              )}
-              <td className="bg-green-50 sticky right-0 font-bold">0</td>
             </tr>
           </tbody>
         </table>
@@ -287,13 +251,11 @@ const App = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-100 to-green-50 text-green-900 flex flex-col items-center px-3 sm:px-6 py-6 sm:py-10 max-w-[1200px] mx-auto overflow-x-hidden">
       <h1 className="text-xl sm:text-2xl font-bold mb-3">🏌️‍♂️ Golf Score Card</h1>
-
       {!online && (
         <div className="bg-yellow-100 text-yellow-800 px-4 py-2 rounded mb-2 text-sm font-medium shadow-sm">
           ⚠️ 現在オフラインモードです（データは自動保存されます）
         </div>
       )}
-
       <input
         type="text"
         value={golfCourseName}
@@ -301,8 +263,7 @@ const App = () => {
         placeholder="ゴルフ場名を入力（例：姉ヶ崎カントリー倶楽部）"
         className="border border-green-200 rounded-lg px-3 py-2 w-full sm:w-96 text-center mb-5 shadow-sm"
       />
-
-      {/* ✅ 統計カード */}
+      {/* 統計カード */}
       <div className="flex flex-wrap justify-center items-center gap-3 bg-white/80 px-4 py-5 rounded-lg shadow-md w-full max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-center mb-6 leading-relaxed">
         <div>前半 Par:{outTotal.par}　Score:{outTotal.score}</div>
         <div>後半 Par:{inTotal.par}　Score:{inTotal.score}</div>
@@ -315,46 +276,19 @@ const App = () => {
         <div>Par3グリーンオン率：{greenOnRate}%</div>
         <div>Par4/5フェアウェイ率：{fairwayRate}%</div>
       </div>
-
-      <Section
-        title="前半（1〜9）"
-        value={courseNames.out}
-        setValue={(val) => setCourseNames({ ...courseNames, out: val })}
-      />
       {renderHoleInputs(0, 9)}
-
-      <Section
-        title="後半（10〜18）"
-        value={courseNames.in}
-        setValue={(val) => setCourseNames({ ...courseNames, in: val })}
-      />
       {renderHoleInputs(9, 18)}
-
       <button
         onClick={resetAll}
         className="bg-gradient-to-r from-green-600 to-lime-500 hover:opacity-90 text-white font-bold py-2 px-8 rounded-full shadow-lg mt-8 transition"
       >
         リセット
       </button>
-
       <div className="text-[11px] text-gray-500 mt-5 mb-10 tracking-wide italic">
         ☆＝-3　◎＝-2　◯＝-1　ー＝±0　△＝+1　□＝+2　+3〜＝+3以上
       </div>
     </div>
   );
 };
-
-const Section = ({ title, value, setValue }) => (
-  <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 mb-3 w-full max-w-md mx-auto">
-    <h2 className="text-lg sm:text-xl font-bold text-green-800">{title}</h2>
-    <input
-      type="text"
-      value={value}
-      onChange={(e) => setValue(e.target.value)}
-      placeholder="コース名（例：OUT）"
-      className="border border-green-200 rounded px-2 py-1 w-40 text-center shadow-sm"
-    />
-  </div>
-);
 
 export default App;
