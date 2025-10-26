@@ -89,9 +89,45 @@ const App = () => {
     return { par, score, putt };
   };
 
+  // ✅ 集計
   const outTotal = total(0, 9);
   const inTotal = total(9, 18);
   const totalScore = outTotal.score + inTotal.score;
+
+  const validDrives = scores
+    .filter((s) => s.par !== "3" && s.drive !== "")
+    .map((s) => parseInt(s.drive))
+    .filter((n) => !isNaN(n));
+
+  const avgDrive =
+    validDrives.length > 0
+      ? Math.round(validDrives.reduce((a, b) => a + b, 0) / validDrives.length)
+      : 0;
+
+  const avgPutt =
+    (
+      scores.reduce((sum, s) => sum + (parseInt(s.putt) || 0), 0) / holeCount
+    ).toFixed(1);
+
+  // ✅ ティーショット比率
+  const par3s = scores.filter((s) => s.par === "3");
+  const par45s = scores.filter((s) => s.par === "4" || s.par === "5");
+
+  const greenOnRate =
+    par3s.length > 0
+      ? Math.round(
+          (par3s.filter((s) => s.teeShot === "グリーンオン").length /
+            par3s.length) *
+            100
+        )
+      : 0;
+
+  const fairwayRate =
+    par45s.length > 0
+      ? Math.round(
+          (par45s.filter((s) => s.teeShot === "◯").length / par45s.length) * 100
+        )
+      : 0;
 
   const renderHoleInputs = (start, end) => (
     <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-3 sm:p-5 mb-6">
@@ -263,10 +299,16 @@ const App = () => {
         className="border border-green-200 rounded-lg px-3 py-2 w-full sm:w-96 text-center mb-5 shadow-sm"
       />
 
-      <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 bg-white/80 px-4 py-3 rounded-lg shadow-md w-full max-w-md mx-auto text-xs sm:text-base text-center mb-6">
+      {/* ✅ 統計カード */}
+      <div className="flex flex-wrap justify-center items-center gap-3 bg-white/80 px-4 py-4 rounded-lg shadow-md w-full max-w-2xl mx-auto text-xs sm:text-base text-center mb-6">
         <div>前半 Par:{outTotal.par}　Score:{outTotal.score}</div>
         <div>後半 Par:{inTotal.par}　Score:{inTotal.score}</div>
         <div className="font-bold text-green-800">Total:{totalScore}</div>
+        <div className="w-full border-t border-green-200 my-2"></div>
+        <div>平均パット：{avgPutt}</div>
+        <div>平均ドライバー：{avgDrive}yd</div>
+        <div>Par3グリーンオン率：{greenOnRate}%</div>
+        <div>Par4/5フェアウェイ率：{fairwayRate}%</div>
       </div>
 
       <Section title="前半（1〜9）" value={courseNames.out} setValue={(val) => setCourseNames({ ...courseNames, out: val })} />
