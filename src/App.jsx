@@ -29,6 +29,7 @@ const App = () => {
   const [golfCourseName, setGolfCourseName] = useState("");
   const [online, setOnline] = useState(navigator.onLine);
 
+  // ✅ オンライン／オフライン監視
   useEffect(() => {
     const updateStatus = () => setOnline(navigator.onLine);
     window.addEventListener("online", updateStatus);
@@ -39,6 +40,7 @@ const App = () => {
     };
   }, []);
 
+  // ✅ ローカル保存・復元
   useEffect(() => {
     const saved = localStorage.getItem("golfScores");
     if (saved) {
@@ -83,12 +85,22 @@ const App = () => {
     const par = slice.reduce((acc, cur) => acc + (parseInt(cur.par) || 0), 0);
     const score = slice.reduce((acc, cur) => acc + (parseInt(cur.score) || 0), 0);
     const putt = slice.reduce((acc, cur) => acc + (parseInt(cur.putt) || 0), 0);
-    return { par, score, putt };
+    const driveCount = slice.filter((cur) => cur.par !== "3" && cur.drive !== "").length;
+    const driveTotal = slice.reduce(
+      (acc, cur) => acc + (parseInt(cur.drive) || 0),
+      0
+    );
+    const avgDrive = driveCount > 0 ? Math.round(driveTotal / driveCount) : 0;
+    return { par, score, putt, avgDrive };
   };
 
   const outTotal = total(0, 9);
   const inTotal = total(9, 18);
   const totalScore = outTotal.score + inTotal.score;
+
+  const avgPutt = (
+    scores.reduce((sum, s) => sum + (parseInt(s.putt) || 0), 0) / holeCount
+  ).toFixed(1);
 
   const validDrives = scores
     .filter((s) => s.par !== "3" && s.drive !== "")
@@ -99,10 +111,6 @@ const App = () => {
     validDrives.length > 0
       ? Math.round(validDrives.reduce((a, b) => a + b, 0) / validDrives.length)
       : 0;
-
-  const avgPutt = (
-    scores.reduce((sum, s) => sum + (parseInt(s.putt) || 0), 0) / holeCount
-  ).toFixed(1);
 
   // ✅ ティーショット比率
   const par3s = scores.filter((s) => s.par === "3");
@@ -142,6 +150,7 @@ const App = () => {
             </tr>
           </thead>
           <tbody>
+            {/* Par */}
             <tr>
               <td className="font-semibold text-green-700">Par</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -163,6 +172,7 @@ const App = () => {
               </td>
             </tr>
 
+            {/* スコア */}
             <tr>
               <td className="font-semibold text-green-700">スコア</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -183,6 +193,7 @@ const App = () => {
               </td>
             </tr>
 
+            {/* パット */}
             <tr>
               <td className="font-semibold text-green-700">パット数</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -203,6 +214,18 @@ const App = () => {
               </td>
             </tr>
 
+            {/* ±差 */}
+            <tr>
+              <td className="font-semibold text-green-700">±差</td>
+              {scores.slice(start, end).map((hole, i) => (
+                <td key={i} className="font-bold">
+                  {hole.diff}
+                </td>
+              ))}
+              <td className="bg-green-50 sticky right-0">-</td>
+            </tr>
+
+            {/* ティーショット */}
             <tr>
               <td className="font-semibold text-green-700">ティーショット</td>
               {scores.slice(start, end).map((hole, i) => (
@@ -241,6 +264,31 @@ const App = () => {
                 </td>
               ))}
               <td className="bg-green-50 sticky right-0">-</td>
+            </tr>
+
+            {/* ドライバー飛距離 */}
+            <tr>
+              <td className="font-semibold text-green-700">ドライバー(yd)</td>
+              {scores.slice(start, end).map((hole, i) =>
+                hole.par !== "3" ? (
+                  <td key={i}>
+                    <input
+                      type="number"
+                      value={hole.drive}
+                      onChange={(e) =>
+                        handleChange(start + i, "drive", e.target.value)
+                      }
+                      className="border border-green-200 rounded-md w-14 sm:w-16 text-center py-1 shadow-inner"
+                      placeholder="yd"
+                    />
+                  </td>
+                ) : (
+                  <td key={i}>-</td>
+                )
+              )}
+              <td className="bg-green-50 sticky right-0 font-bold">
+                {total(start, end).avgDrive}
+              </td>
             </tr>
           </tbody>
         </table>
