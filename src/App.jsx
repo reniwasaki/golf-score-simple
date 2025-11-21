@@ -271,9 +271,11 @@ const App = () => {
                       >
                         <option value="-">-</option>
                         <option value="フェアウェイ">フェアウェイ</option>
-                        <option value="右ラフ">右ラフ</option>
-                        <option value="左ラフ">左ラフ</option>
-                        <option value="OB">OB</option>
+                         <option value="右ラフ">右ラフ</option>
+                         <option value="左ラフ">左ラフ</option>
+                         <option value="ショート">ショート</option>
+                         <option value="1ペナ">1ペナ</option>
+                         <option value="OB">OB</option>
                       </select>
                     )}
                   </td>
